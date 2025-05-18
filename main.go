@@ -15,7 +15,7 @@ func main(){
 	r.Use(cors.AllowAll().Handler);//tempoarily allow all origins
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request){
-		w.Write([]byte("Go server is active!!!"))
+		w.Write([]byte("sharp Go server is active!!!"))
 	})
 
 	http.ListenAndServe(":8000",r)
