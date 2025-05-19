@@ -1,2 +1,3 @@
 package controllers
 
+func createShortenedUrl (){}
