@@ -1,16 +1,15 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	dbconfig "url-shortner/db/dbConfig"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
 
 func main(){
@@ -18,20 +17,11 @@ func main(){
 	if err != nil {
 		log.Fatal("Error loading .env files")
 	}
-	dbStr := os.Getenv("DB_URL");
 	portString := os.Getenv("PORT");
 
-	db, err := sql.Open("postgres",dbStr);
+	db := dbconfig.ConnectDb();
+	defer db.Close()
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer db.Close();
-
-	if err = db.Ping(); err != nil {
-		log.Fatal((err))
-	}
 
 	r := chi.NewRouter();
 	r.Use(middleware.Logger);
