@@ -7,40 +7,114 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createURL = `-- name: CreateURL :one
-INSERT INTO urls (original_url) VALUES ($1)
-RETURNING id, original_url, created_at
+INSERT INTO urls (original_url, short_code)
+VALUES ($1, $2)
+RETURNING id, short_code, original_url, click_count, created_at
 `
 
-func (q *Queries) CreateURL(ctx context.Context, originalUrl string) (Url, error) {
-	row := q.db.QueryRowContext(ctx, createURL, originalUrl)
+type CreateURLParams struct {
+	OriginalUrl string
+	ShortCode   sql.NullString
+}
+
+func (q *Queries) CreateURL(ctx context.Context, arg CreateURLParams) (Url, error) {
+	row := q.db.QueryRowContext(ctx, createURL, arg.OriginalUrl, arg.ShortCode)
 	var i Url
-	err := row.Scan(&i.ID, &i.OriginalUrl, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.ShortCode,
+		&i.OriginalUrl,
+		&i.ClickCount,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
-const getURLByID = `-- name: GetURLByID :one
-SELECT id, original_url, created_at FROM urls WHERE id = $1
+const deleteURL = `-- name: DeleteURL :exec
+DELETE FROM urls WHERE id = $1
 `
 
-func (q *Queries) GetURLByID(ctx context.Context, id int32) (Url, error) {
+func (q *Queries) DeleteURL(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteURL, id)
+	return err
+}
+
+const getAllURLs = `-- name: GetAllURLs :many
+SELECT id, short_code, original_url, click_count, created_at FROM urls
+`
+
+func (q *Queries) GetAllURLs(ctx context.Context) ([]Url, error) {
+	rows, err := q.db.QueryContext(ctx, getAllURLs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Url
+	for rows.Next() {
+		var i Url
+		if err := rows.Scan(
+			&i.ID,
+			&i.ShortCode,
+			&i.OriginalUrl,
+			&i.ClickCount,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLByID = `-- name: GetURLByID :one
+SELECT id, short_code, original_url, click_count, created_at FROM urls WHERE id = $1
+`
+
+func (q *Queries) GetURLByID(ctx context.Context, id int64) (Url, error) {
 	row := q.db.QueryRowContext(ctx, getURLByID, id)
 	var i Url
-	err := row.Scan(&i.ID, &i.OriginalUrl, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.ShortCode,
+		&i.OriginalUrl,
+		&i.ClickCount,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
 const getURLByShortCode = `-- name: GetURLByShortCode :one
-SELECT urls.id, urls.original_url, urls.created_at FROM urls
-JOIN redirects ON urls.id = redirects.url_id
-WHERE redirects.short_code = $1
+SELECT id, short_code, original_url, click_count, created_at FROM urls WHERE short_code = $1
 `
 
-func (q *Queries) GetURLByShortCode(ctx context.Context, shortCode string) (Url, error) {
+func (q *Queries) GetURLByShortCode(ctx context.Context, shortCode sql.NullString) (Url, error) {
 	row := q.db.QueryRowContext(ctx, getURLByShortCode, shortCode)
 	var i Url
-	err := row.Scan(&i.ID, &i.OriginalUrl, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.ShortCode,
+		&i.OriginalUrl,
+		&i.ClickCount,
+		&i.CreatedAt,
+	)
 	return i, err
+}
+
+const updateURLClickCount = `-- name: UpdateURLClickCount :exec
+UPDATE urls SET click_count = click_count + 1 WHERE id = $1
+`
+
+func (q *Queries) UpdateURLClickCount(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, updateURLClickCount, id)
+	return err
 }

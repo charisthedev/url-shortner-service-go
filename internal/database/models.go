@@ -8,15 +8,10 @@ import (
 	"database/sql"
 )
 
-type Redirect struct {
-	ID        int32
-	ShortCode string
-	UrlID     sql.NullInt32
-	CreatedAt sql.NullTime
-}
-
 type Url struct {
-	ID          int32
+	ID          int64
+	ShortCode   sql.NullString
 	OriginalUrl string
+	ClickCount  sql.NullInt32
 	CreatedAt   sql.NullTime
 }

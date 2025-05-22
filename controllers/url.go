@@ -1,3 +1,5 @@
 package controllers
 
-func createShortenedUrl (){}
+func createShortenedUrl (url string) string{
+	return url
+}
