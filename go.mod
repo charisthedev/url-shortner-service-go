@@ -10,5 +10,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lib/pq v1.10.9 // indirect
+	github.com/mattheath/base62 v0.0.0-20150408093626-b80cdc656a7a // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 )

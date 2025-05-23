@@ -3,7 +3,7 @@
 //   sqlc v1.29.0
 // source: url.sql
 
-package db
+package database
 
 import (
 	"context"
@@ -108,6 +108,20 @@ func (q *Queries) GetURLByShortCode(ctx context.Context, shortCode sql.NullStrin
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const updateShortCode = `-- name: UpdateShortCode :exec
+UPDATE urls SET short_code = $1 WHERE id = $2
+`
+
+type UpdateShortCodeParams struct {
+	ShortCode sql.NullString
+	ID        int64
+}
+
+func (q *Queries) UpdateShortCode(ctx context.Context, arg UpdateShortCodeParams) error {
+	_, err := q.db.ExecContext(ctx, updateShortCode, arg.ShortCode, arg.ID)
+	return err
 }
 
 const updateURLClickCount = `-- name: UpdateURLClickCount :exec
