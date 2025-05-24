@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 	dbconfig "url-shortner/db/dbConfig"
 	"url-shortner/internal/database"
 	"url-shortner/internal/utils"
@@ -16,6 +18,7 @@ type CreatePayload struct {
 
 func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 	var input CreatePayload
+	hostUrl := os.Getenv("HOST_URL")
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		utils.RespondWithError(w,http.StatusBadRequest,"Invalid request body")
 		return
@@ -36,6 +39,7 @@ func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 		return
 	}
 	shortCode := utils.HashUrl(createdUrl.ID);
+	log.Println(shortCode)
 	err = qtx.UpdateShortCode(ctx,database.UpdateShortCodeParams{ShortCode:sql.NullString{String: shortCode, Valid: true},ID: createdUrl.ID});
 	if err != nil {
 		utils.RespondWithError(w,http.StatusInternalServerError,"Failed to create url")
@@ -45,5 +49,5 @@ func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 		utils.RespondWithError(w, http.StatusInternalServerError,"Failed to commit transaction")
 		return
 	}
-	utils.RespondWithSuccess(w,200,"url created",map[string]string{"url": "http://localhost:5000/"+shortCode})
+	utils.RespondWithSuccess(w,200,"url created",map[string]string{"url": hostUrl+shortCode})
 }

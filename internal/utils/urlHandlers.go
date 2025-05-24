@@ -1,7 +1,15 @@
 package utils
 
-import "github.com/mattheath/base62"
+import (
+	"github.com/mattheath/base62"
+)
 
-func HashUrl (identifier int64) string {
-	return base62.EncodeInt64(identifier)
+func ObfuscateID(id int64) int64 {
+    const prime = 1580030173
+    return (id * prime) % 1000000007 // modulo a big prime to keep it in range
+}
+
+func HashUrl(id int64) string {
+    obfuscated := ObfuscateID(id)
+    return base62.EncodeInt64(obfuscated)
 }
