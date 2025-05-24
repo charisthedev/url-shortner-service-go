@@ -14,7 +14,7 @@ type CreatePayload struct {
 	URL string `json:"url"`
 }
 
-func createShortenedUrl (w http.ResponseWriter, r *http.Request){
+func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 	var input CreatePayload
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		utils.RespondWithError(w,http.StatusBadRequest,"Invalid request body")

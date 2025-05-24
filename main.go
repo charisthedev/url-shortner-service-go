@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"url-shortner/controllers"
 	dbconfig "url-shortner/db/dbConfig"
 
 	"github.com/go-chi/chi/v5"
@@ -31,6 +32,8 @@ func main(){
 	r.Get("/", func(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte("Go server is active!!!"))
 	})
+
+	r.Post("/create-url", controllers.CreateShortenedUrl)
 
 	srv := http.Server{
 		Addr: ":" + portString,
