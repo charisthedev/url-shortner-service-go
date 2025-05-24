@@ -33,9 +33,9 @@ func main(){
 		w.Write([]byte("Go server is active!!!"))
 	})
 
-	r.Post("/create-url", controllers.CreateShortenedUrl)
+	r.Post("/shorten", controllers.CreateShortenedUrl)
 
-	r.Get("/{id}", controllers.VisitUrl)
+	r.Get("/{short_code}", controllers.VisitUrl)
 
 	srv := http.Server{
 		Addr: ":" + portString,

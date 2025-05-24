@@ -55,7 +55,7 @@ func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 }
 
 func VisitUrl (w http.ResponseWriter, r *http.Request) {
-	input := chi.URLParam(r,"id");
+	input := chi.URLParam(r,"short_code");
 	db := dbconfig.ConnectDb();
 	defer db.Close()
 	ctx := context.Background();
