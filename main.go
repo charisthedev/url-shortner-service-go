@@ -35,6 +35,8 @@ func main(){
 
 	r.Post("/create-url", controllers.CreateShortenedUrl)
 
+	r.Get("/{id}", controllers.VisitUrl)
+
 	srv := http.Server{
 		Addr: ":" + portString,
 		Handler: r,

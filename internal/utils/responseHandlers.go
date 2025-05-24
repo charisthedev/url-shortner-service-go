@@ -20,6 +20,11 @@ func RespondWithSuccess (w http.ResponseWriter, code int, message string, data i
 	json.NewEncoder(w).Encode(SuccessResponse{message,data})
 }
 
+func RespondWithRedirect(w http.ResponseWriter, r *http.Request, url string, code int) {
+    http.Redirect(w, r, url, code)
+}
+
+
 func RespondWithError (w http.ResponseWriter, code int, message string) {
 	w.Header().Set("Content-Type","application/json")
 	w.WriteHeader(code)

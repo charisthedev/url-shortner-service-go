@@ -10,6 +10,8 @@ import (
 	dbconfig "url-shortner/db/dbConfig"
 	"url-shortner/internal/database"
 	"url-shortner/internal/utils"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type CreatePayload struct {
@@ -39,7 +41,7 @@ func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 		return
 	}
 	shortCode := utils.HashUrl(createdUrl.ID);
-	log.Println(shortCode)
+	log.Println(shortCode,createdUrl.ID)
 	err = qtx.UpdateShortCode(ctx,database.UpdateShortCodeParams{ShortCode:sql.NullString{String: shortCode, Valid: true},ID: createdUrl.ID});
 	if err != nil {
 		utils.RespondWithError(w,http.StatusInternalServerError,"Failed to create url")
@@ -50,4 +52,18 @@ func CreateShortenedUrl (w http.ResponseWriter, r *http.Request){
 		return
 	}
 	utils.RespondWithSuccess(w,200,"url created",map[string]string{"url": hostUrl+shortCode})
+}
+
+func VisitUrl (w http.ResponseWriter, r *http.Request) {
+	input := chi.URLParam(r,"id");
+	db := dbconfig.ConnectDb();
+	defer db.Close()
+	ctx := context.Background();
+	queries := database.New(db);
+	data, err := queries.GetURLByShortCode(ctx,sql.NullString{String: input, Valid: true});
+	if err != nil{
+		utils.RespondWithError(w,http.StatusNotFound,"invalid url")
+		return
+	}
+	utils.RespondWithRedirect(w,r,data.OriginalUrl,http.StatusFound)
 }
