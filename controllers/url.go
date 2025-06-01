@@ -65,5 +65,6 @@ func VisitUrl (w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithError(w,http.StatusNotFound,"invalid url")
 		return
 	}
+	queries.UpdateURLClickCount(ctx,data.ID);
 	utils.RespondWithRedirect(w,r,data.OriginalUrl,http.StatusFound)
 }
